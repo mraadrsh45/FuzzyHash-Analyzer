@@ -234,5 +234,8 @@ Distributed under the **MIT License**.
 > **Academic & Legal Disclaimer:** Developed as a Digital Forensics and Cybersecurity research platform. Similarity scores indicate structural and byte-sequence proximity; forensic conclusions must always be substantiated with static disassembly, dynamic sandboxing, and contextual threat intelligence.
 
 <div align="center">
-  <b>Maintained by <a href="https://github.com/mraadrsh45">mraadrsh45</a></b>
+  <p>
+    🧑‍💻 <b>Core Development & Forensics:</b> <a href="https://github.com/mraadrsh45">mraadrsh45</a> &nbsp;|&nbsp; 
+    🎨 <b>UI / Frontend Design:</b> <a href="https://github.com/sajidakhatoon786">sajidakhatoon786</a>
+  </p>
 </div>
