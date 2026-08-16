@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}404 - Artifact Not Found | FuzzyHash Analyzer{% endblock %}
+
+{% block header_title %}404 Not Found{% endblock %}
+
+{% block content %}
+<div class="card" style="text-align: center; padding: 60px 20px; max-width: 600px; margin: 40px auto;">
+    <div style="font-size: 56px; margin-bottom: 10px; color: var(--accent-cyan);">404</div>
+    <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 10px;">Forensic Artifact or Record Not Found</h2>
+    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 25px;">
+        The requested forensic case, analysis report, or resource does not exist in the workstation database or may have been deleted.
+    </p>
+    <div>
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary">Return to SOC Dashboard</a>
+    </div>
+</div>
+{% endblock %}

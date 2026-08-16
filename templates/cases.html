@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Case Management - FuzzyHash Analyzer{% endblock %}
+
+{% block header_title %}Forensic Case Management{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Forensic Investigation Cases</h3>
+        <a href="{{ url_for('cases.create') }}" class="btn btn-primary">+ Create New Case</a>
+    </div>
+
+    <!-- SEARCH & FILTER BAR -->
+    <form action="{{ url_for('cases.index') }}" method="GET" style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search case ID, title, or investigator..." style="max-width: 350px;">
+        <select name="status" class="form-control" style="max-width: 160px;" onchange="this.form.submit()">
+            <option value="All" {% if current_status == 'All' or not current_status %}selected{% endif %}>All Statuses</option>
+            <option value="Open" {% if current_status == 'Open' %}selected{% endif %}>Open</option>
+            <option value="In Progress" {% if current_status == 'In Progress' %}selected{% endif %}>In Progress</option>
+            <option value="Closed" {% if current_status == 'Closed' %}selected{% endif %}>Closed</option>
+        </select>
+        <button type="submit" class="btn btn-secondary">Filter</button>
+        {% if search_query or current_status %}
+            <a href="{{ url_for('cases.index') }}" class="btn btn-secondary">Reset</a>
+        {% endif %}
+    </form>
+
+    <div class="table-container">
+        <table class="tech-table">
+            <thead>
+                <tr>
+                    <th>Case ID</th>
+                    <th>Case Name</th>
+                    <th>Investigator</th>
+                    <th>Status</th>
+                    <th>Evidence Items</th>
+                    <th>Analyses</th>
+                    <th>Created Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if cases %}
+                    {% for c in cases %}
+                    <tr>
+                        <td class="font-mono" style="color: var(--accent-cyan); font-weight: 700;">{{ c.case_id }}</td>
+                        <td>
+                            <strong>{{ c.name }}</strong>
+                            {% if c.description %}
+                                <div style="font-size: 11px; color: var(--text-muted); truncate">{{ c.description[:60] }}...</div>
+                            {% endif %}
+                        </td>
+                        <td>{{ c.investigator }}</td>
+                        <td>
+                            {% if c.status == 'Open' %}
+                                <span class="badge badge-info">Open</span>
+                            {% elif c.status == 'In Progress' %}
+                                <span class="badge badge-mod">In Progress</span>
+                            {% else %}
+                                <span class="badge badge-low">Closed</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ c.evidences|length }} items</td>
+                        <td>{{ c.analyses|length }} runs</td>
+                        <td style="color: var(--text-muted); font-size: 12px;">{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <a href="{{ url_for('cases.detail', case_id=c.case_id) }}" class="btn btn-secondary btn-sm">Open Case</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                            No matching forensic cases found. Click "Create New Case" to start.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

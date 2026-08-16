@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}System Settings - FuzzyHash Analyzer{% endblock %}
+
+{% block header_title %}Workstation Settings & Administration{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">⚙️ Forensic Workstation Configuration</h3>
+        <span class="badge badge-info">Local System</span>
+    </div>
+    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+        Manage workstation parameters, disk caches, temporary upload directories, and forensic database records.
+    </p>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- SYSTEM LIMITS & ENVIRONMENT CARD -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">System & Security Parameters</h3>
+        </div>
+        <table class="tech-table" style="font-size: 12px;">
+            <tr>
+                <th style="width: 40%;">Max Upload Size:</th>
+                <td><strong>{{ max_upload_mb|int }} MB</strong> (Configurable via Config.MAX_CONTENT_LENGTH)</td>
+            </tr>
+            <tr>
+                <th>Execution Policy:</th>
+                <td><span style="color: var(--accent-emerald); font-weight: bold;">NO EXECUTION</span> (Files are strictly read as byte buffers)</td>
+            </tr>
+            <tr>
+                <th>Fuzzy Algorithms:</th>
+                <td><strong>ssdeep (CTPH)</strong> & <strong>TLSH (Locality Sensitive)</strong></td>
+            </tr>
+            <tr>
+                <th>Database Engine:</th>
+                <td><strong>SQLite 3</strong> (Local persistent storage)</td>
+            </tr>
+            <tr>
+                <th>Session Expiry:</th>
+                <td><strong>1 Hour (3600s)</strong> with HTTPOnly flags enabled</td>
+            </tr>
+            <tr>
+                <th>External Submission:</th>
+                <td><span style="color: var(--accent-emerald); font-weight: bold;">DISABLED</span> (100% offline local processing)</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- CACHE & MAINTENANCE CARD -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Storage & Cache Maintenance</h3>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <h4 style="font-size: 13px; color: var(--text-main); margin-bottom: 6px;">Clear Temporary Uploads & PDF Cache</h4>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
+                Safely removes temporary files from the <code class="font-mono">uploads/</code> and <code class="font-mono">reports/generated/</code> directories.
+            </p>
+            <form method="POST" onsubmit="return confirm('Are you sure you want to purge temporary storage?');">
+                <input type="hidden" name="action" value="clear_temp">
+                <button type="submit" class="btn btn-secondary btn-sm">
+                    🧹 Purge Temporary Storage
+                </button>
+            </form>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-color); padding-top: 15px;">
+            <h4 style="font-size: 13px; color: var(--accent-rose); margin-bottom: 6px;">Database Reset & Demo Data Reseed</h4>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
+                Resets the SQLite database tables and restores sample forensic demo investigations.
+            </p>
+            <form method="POST" onsubmit="return confirm('⚠️ WARNING: This will delete all custom cases and analyses and restore demo dataset. Proceed?');">
+                <input type="hidden" name="action" value="reset_demo">
+                <button type="submit" class="btn btn-danger btn-sm">
+                    🔄 Reset & Reseed Demo Data
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ABOUT & PRIVACY ASSURANCE -->
+<div class="card" style="margin-top: 10px;">
+    <div class="card-header">
+        <h3 class="card-title">Forensic Privacy & Architecture Assurance</h3>
+    </div>
+    <div style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">
+        <p style="margin-bottom: 8px;">
+            <strong>Data Privacy:</strong> FuzzyHash Analyzer is engineered for isolated digital forensic and security operations center (SOC) environments. 
+            All uploaded artifacts are analyzed strictly in-memory or in isolated safe temporary locations. 
+            No files, digests, or metadata are transmitted to external threat intelligence providers or cloud services.
+        </p>
+        <p>
+            <strong>Version:</strong> FuzzyHash Analyzer v2.6 | Python 3.12+ Forensics Framework | ReportLab PDF Engine
+        </p>
+    </div>
+</div>
+{% endblock %}

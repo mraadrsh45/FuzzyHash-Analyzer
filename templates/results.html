@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Results {{ analysis.analysis_id }} - FuzzyHash Analyzer{% endblock %}
+
+{% block header_title %}Forensic Analysis Results: {{ analysis.analysis_id }}{% endblock %}
+
+{% block content %}
+<!-- HEADER ACTIONS BAR -->
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+    <div>
+        <span class="font-mono" style="color: var(--accent-cyan); font-size: 13px; font-weight: bold;">{{ analysis.analysis_id }}</span>
+        <span style="color: var(--text-muted); margin: 0 8px;">|</span>
+        <span style="font-size: 13px; color: var(--text-muted);">Case: <strong>{{ analysis.case.case_id }} ({{ analysis.case.name }})</strong></span>
+        <span style="color: var(--text-muted); margin: 0 8px;">|</span>
+        <span style="font-size: 13px; color: var(--text-muted);">Timestamp: {{ analysis.created_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}</span>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+        <button onclick="window.print()" class="btn btn-secondary btn-sm">🖨️ Print Screen</button>
+        <a href="{{ url_for('reports.download_report', analysis_id=analysis.analysis_id) }}" class="btn btn-primary btn-sm">📄 Download PDF Report</a>
+        <a href="{{ url_for('cases.detail', case_id=analysis.case.case_id) }}" class="btn btn-secondary btn-sm">← Back to Case</a>
+    </div>
+</div>
+
+<!-- SIMILARITY SCORE HIGHLIGHT GAUGE -->
+<div class="similarity-gauge-container" style="margin-bottom: 25px;">
+    <div class="gauge-circle {% if analysis.similarity_score <= 30 %}gauge-low{% elif analysis.similarity_score <= 70 %}gauge-mod{% else %}gauge-high{% endif %}">
+        <span class="gauge-score" style="{% if analysis.similarity_score <= 30 %}color: #34d399;{% elif analysis.similarity_score <= 70 %}color: #fbbf24;{% else %}color: #fb7185;{% endif %}">
+            {{ analysis.similarity_score }}%
+        </span>
+        <span class="gauge-subtext">SIMILARITY SCORE</span>
+    </div>
+
+    <div style="font-size: 18px; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; {% if analysis.similarity_score <= 30 %}color: #34d399;{% elif analysis.similarity_score <= 70 %}color: #fbbf24;{% else %}color: #fb7185;{% endif %}">
+        {{ analysis.assessment|upper }}
+    </div>
+
+    <p style="font-size: 13px; color: var(--text-muted); max-width: 650px;">
+        {{ eval_meta.description }}
+    </p>
+
+    <!-- MANDATORY METHODOLOGICAL WARNING -->
+    <div style="margin-top: 15px; padding: 10px 16px; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 6px; font-size: 12px; color: #fb7185; max-width: 750px; text-align: center;">
+        <strong>⚠️ FORENSIC NOTICE:</strong> High similarity is an investigative file-relationship indicator and <strong>DOES NOT</strong> independently establish that either file is malicious.
+    </div>
+</div>
+
+<!-- EVIDENCE COMPARISON GRID -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+    <!-- FILE A CARD -->
+    <div class="card" style="border-top: 3px solid var(--accent-cyan);">
+        <div class="card-header">
+            <h3 class="card-title">FILE A (Reference Artifact)</h3>
+            <span class="badge badge-info">Baseline</span>
+        </div>
+        <table class="tech-table" style="font-size: 12px;">
+            <tr><th style="width: 110px;">Filename:</th><td><strong>{{ analysis.evidence_a.original_filename }}</strong></td></tr>
+            <tr><th>File Size:</th><td>{{ (analysis.evidence_a.file_size / 1024)|round(2) }} KB ({{ analysis.evidence_a.file_size }} B)</td></tr>
+            <tr><th>MIME Type:</th><td>{{ analysis.evidence_a.mime_type }}</td></tr>
+            <tr><th>MD5:</th><td class="font-mono">{{ analysis.evidence_a.md5 }}</td></tr>
+            <tr><th>SHA-256:</th><td class="font-mono" style="font-size: 11px;">{{ analysis.evidence_a.sha256 }}</td></tr>
+            <tr><th>ssdeep (CTPH):</th><td class="font-mono" style="font-size: 11px; color: var(--accent-cyan);">{{ analysis.evidence_a.fuzzy_hash_ssdeep }}</td></tr>
+            <tr><th>TLSH:</th><td class="font-mono" style="font-size: 11px; color: var(--accent-cyan);">{{ analysis.evidence_a.fuzzy_hash_tlsh }}</td></tr>
+        </table>
+
+        {% if pe_a and pe_a.is_pe %}
+        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+            <div style="font-size: 11px; font-weight: bold; color: var(--accent-cyan); text-transform: uppercase; margin-bottom: 6px;">PE Header Metadata (File A)</div>
+            <div style="font-size: 11px; color: var(--text-muted);">
+                Architecture: <strong>{{ pe_a.architecture }}</strong> | Entry Point: <span class="font-mono">{{ pe_a.entry_point }}</span> | Sections: {{ pe_a.section_count }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- FILE B CARD -->
+    <div class="card" style="border-top: 3px solid var(--accent-amber);">
+        <div class="card-header">
+            <h3 class="card-title">FILE B (Target Artifact)</h3>
+            <span class="badge badge-mod">Suspected Variant</span>
+        </div>
+        <table class="tech-table" style="font-size: 12px;">
+            <tr><th style="width: 110px;">Filename:</th><td><strong>{{ analysis.evidence_b.original_filename }}</strong></td></tr>
+            <tr><th>File Size:</th><td>{{ (analysis.evidence_b.file_size / 1024)|round(2) }} KB ({{ analysis.evidence_b.file_size }} B)</td></tr>
+            <tr><th>MIME Type:</th><td>{{ analysis.evidence_b.mime_type }}</td></tr>
+            <tr><th>MD5:</th><td class="font-mono">{{ analysis.evidence_b.md5 }}</td></tr>
+            <tr><th>SHA-256:</th><td class="font-mono" style="font-size: 11px;">{{ analysis.evidence_b.sha256 }}</td></tr>
+            <tr><th>ssdeep (CTPH):</th><td class="font-mono" style="font-size: 11px; color: var(--accent-amber);">{{ analysis.evidence_b.fuzzy_hash_ssdeep }}</td></tr>
+            <tr><th>TLSH:</th><td class="font-mono" style="font-size: 11px; color: var(--accent-amber);">{{ analysis.evidence_b.fuzzy_hash_tlsh }}</td></tr>
+        </table>
+
+        {% if pe_b and pe_b.is_pe %}
+        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+            <div style="font-size: 11px; font-weight: bold; color: var(--accent-amber); text-transform: uppercase; margin-bottom: 6px;">PE Header Metadata (File B)</div>
+            <div style="font-size: 11px; color: var(--text-muted);">
+                Architecture: <strong>{{ pe_b.architecture }}</strong> | Entry Point: <span class="font-mono">{{ pe_b.entry_point }}</span> | Sections: {{ pe_b.section_count }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ALGORITHM BREAKDOWN & FINDINGS -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Algorithm Breakdown & Analyst Findings</h3>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div style="background: var(--bg-main); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color);">
+            <div style="font-weight: bold; color: var(--accent-cyan); margin-bottom: 4px;">ssdeep Context-Triggered Piecewise Hashing</div>
+            <div style="font-size: 20px; font-weight: 700; color: var(--text-main);">Score: {{ analysis.ssdeep_score }} / 100</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                Evaluates sequence similarity using rolling 6-bit checksums across variable block sizes.
+            </div>
+        </div>
+
+        <div style="background: var(--bg-main); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color);">
+            <div style="font-weight: bold; color: var(--accent-cyan); margin-bottom: 4px;">TLSH Locality Sensitive Hashing</div>
+            <div style="font-size: 20px; font-weight: 700; color: var(--text-main);">
+                Distance: {{ analysis.tlsh_score }} <span style="font-size: 13px; color: var(--accent-emerald);">({{ analysis.tlsh_similarity_pct }}% normalized)</span>
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                Measures 3-byte tuple distributions across byte-pair buckets. Distance of 0 indicates identical files.
+            </div>
+        </div>
+    </div>
+
+    <div style="border-top: 1px solid var(--border-color); padding-top: 15px;">
+        <h4 style="font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 6px;">Analyst Notes</h4>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.6; background: var(--bg-main); padding: 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+            {{ analysis.notes }}
+        </div>
+    </div>
+</div>
+
+<!-- METHODOLOGY EXPLANATION -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Forensic Methodology & Next Steps</h3>
+    </div>
+    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px;">
+        {{ eval_meta.methodology }}
+    </p>
+    <div style="font-size: 12px; font-weight: 600; color: var(--accent-cyan); text-transform: uppercase; margin-bottom: 6px;">Recommended Further Investigation Actions:</div>
+    <ul style="font-size: 13px; color: var(--text-muted); padding-left: 20px; line-height: 1.8;">
+        <li>Perform static disassembling (Ghidra / IDA Pro) to inspect shared subroutines.</li>
+        <li>Execute dynamic sandboxing (Cuckoo / Any.Run) to monitor runtime API calls and network C2 traffic.</li>
+        <li>Run YARA signature rules against the binary payload for malware family classification.</li>
+        <li>Query threat intelligence platforms (VirusTotal / AlienVault OTX) using the calculated SHA-256 digests.</li>
+    </ul>
+</div>
+{% endblock %}

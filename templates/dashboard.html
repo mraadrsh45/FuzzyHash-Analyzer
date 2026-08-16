@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}SOC Dashboard - FuzzyHash Analyzer{% endblock %}
+
+{% block header_title %}SOC Investigation Dashboard{% endblock %}
+
+{% block content %}
+<!-- DEMO DATA BANNER -->
+<div style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 6px; padding: 10px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="badge badge-info">DEMO DATA READY</span>
+        <span style="font-size: 12px; color: var(--text-muted);">Benchmark forensic sample cases and fuzzy similarity analyses are pre-loaded for academic demonstration.</span>
+    </div>
+    <a href="{{ url_for('analysis.new_analysis') }}" class="btn btn-primary btn-sm">+ Start Analysis</a>
+</div>
+
+<!-- STATS COUNTERS GRID -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-label">Total Cases</span>
+        <span class="stat-value">{{ total_cases }}</span>
+        <span class="stat-desc">Active forensic case files</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Total Analyses</span>
+        <span class="stat-value" style="color: var(--accent-cyan);">{{ total_analyses }}</span>
+        <span class="stat-desc">Completed similarity runs</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">High Similarity (71-100%)</span>
+        <span class="stat-value" style="color: var(--accent-rose);">{{ high_sim_count }}</span>
+        <span class="stat-desc">Structural lineage indicators</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Moderate Similarity (31-70%)</span>
+        <span class="stat-value" style="color: var(--accent-amber);">{{ mod_sim_count }}</span>
+        <span class="stat-desc">Partial code overlap</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Low Similarity (0-30%)</span>
+        <span class="stat-value" style="color: var(--accent-emerald);">{{ low_sim_count }}</span>
+        <span class="stat-desc">Distinct binary structures</span>
+    </div>
+</div>
+
+<!-- CHARTS ROW -->
+<div class="dashboard-charts-row">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Similarity Distribution</h3>
+            <span style="font-size: 11px; color: var(--text-muted);">Fuzzy Hashing Score Ranges</span>
+        </div>
+        <div class="chart-container">
+            <canvas id="similarityDistChart"></canvas>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Analysis Activity Timeline</h3>
+            <span style="font-size: 11px; color: var(--text-muted);">Analyses Executed Over Time</span>
+        </div>
+        <div class="chart-container">
+            <canvas id="activityTimelineChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- RECENT INVESTIGATIONS TABLE -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Recent File Similarity Investigations</h3>
+        <a href="{{ url_for('history.index') }}" class="btn btn-secondary btn-sm">View All History</a>
+    </div>
+
+    <div class="table-container">
+        <table class="tech-table">
+            <thead>
+                <tr>
+                    <th>Case ID</th>
+                    <th>Analysis ID</th>
+                    <th>File A (Reference)</th>
+                    <th>File B (Target)</th>
+                    <th>Similarity</th>
+                    <th>Assessment</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if recent_analyses %}
+                    {% for an in recent_analyses %}
+                    <tr>
+                        <td class="font-mono" style="color: var(--accent-cyan); font-weight: 600;">{{ an.case.case_id if an.case else 'N/A' }}</td>
+                        <td class="font-mono">{{ an.analysis_id }}</td>
+                        <td>{{ an.evidence_a.original_filename if an.evidence_a else 'N/A' }}</td>
+                        <td>{{ an.evidence_b.original_filename if an.evidence_b else 'N/A' }}</td>
+                        <td>
+                            <strong style="font-size: 14px; {% if an.similarity_score >= 71 %}color: var(--accent-rose);{% elif an.similarity_score >= 31 %}color: var(--accent-amber);{% else %}color: var(--accent-emerald);{% endif %}">
+                                {{ an.similarity_score }}%
+                            </strong>
+                        </td>
+                        <td>
+                            {% if an.assessment == 'High Similarity' %}
+                                <span class="badge badge-high">High Similarity</span>
+                            {% elif an.assessment == 'Moderate Similarity' %}
+                                <span class="badge badge-mod">Moderate Similarity</span>
+                            {% else %}
+                                <span class="badge badge-low">Low Similarity</span>
+                            {% endif %}
+                        </td>
+                        <td style="color: var(--text-muted); font-size: 12px;">{{ an.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <a href="{{ url_for('analysis.results', analysis_id=an.analysis_id) }}" class="btn btn-secondary btn-sm">View Results</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 25px; color: var(--text-muted);">
+                            No investigations recorded yet. Click "New Analysis" to compare files.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- RECENT CASE CARDS GRID -->
+<div style="margin-top: 25px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+        <h3 style="font-size: 15px; font-weight: 600;">Active Forensic Cases</h3>
+        <a href="{{ url_for('cases.index') }}" class="btn btn-secondary btn-sm">Manage Cases</a>
+    </div>
+
+    <div class="recent-cases-grid">
+        {% for c in recent_cases %}
+        <div class="case-card">
+            <div>
+                <div class="case-card-header">
+                    <span class="case-code">{{ c.case_id }}</span>
+                    <span class="badge badge-info">{{ c.status }}</span>
+                </div>
+                <div class="case-name">{{ c.name }}</div>
+                <div class="case-desc">{{ c.description or 'No description provided.' }}</div>
+            </div>
+            <div class="case-meta">
+                <span>Investigator: {{ c.investigator }}</span>
+                <a href="{{ url_for('cases.detail', case_id=c.case_id) }}" style="color: var(--accent-cyan); font-weight: 600; text-decoration: none;">View Case →</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}

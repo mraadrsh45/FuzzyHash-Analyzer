@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis History - FuzzyHash Analyzer{% endblock %}
+
+{% block header_title %}Forensic Analysis History Log{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Completed Similarity Analyses</h3>
+    </div>
+
+    <!-- SEARCH & FILTER -->
+    <form action="{{ url_for('history.index') }}" method="GET" style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search Analysis ID or notes..." style="max-width: 350px;">
+        <select name="filter" class="form-control" style="max-width: 180px;" onchange="this.form.submit()">
+            <option value="All" {% if current_filter == 'All' or not current_filter %}selected{% endif %}>All Assessments</option>
+            <option value="High" {% if current_filter == 'High' %}selected{% endif %}>High Similarity (71-100%)</option>
+            <option value="Moderate" {% if current_filter == 'Moderate' %}selected{% endif %}>Moderate Similarity (31-70%)</option>
+            <option value="Low" {% if current_filter == 'Low' %}selected{% endif %}>Low Similarity (0-30%)</option>
+        </select>
+        <button type="submit" class="btn btn-secondary">Filter</button>
+        {% if search_query or current_filter %}
+            <a href="{{ url_for('history.index') }}" class="btn btn-secondary">Reset</a>
+        {% endif %}
+    </form>
+
+    <div class="table-container">
+        <table class="tech-table">
+            <thead>
+                <tr>
+                    <th>Case ID</th>
+                    <th>Analysis ID</th>
+                    <th>File A</th>
+                    <th>File B</th>
+                    <th>Similarity</th>
+                    <th>Assessment</th>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if analyses %}
+                    {% for an in analyses %}
+                    <tr>
+                        <td class="font-mono" style="color: var(--accent-cyan); font-weight: 600;">{{ an.case.case_id if an.case else 'N/A' }}</td>
+                        <td class="font-mono">{{ an.analysis_id }}</td>
+                        <td>{{ an.evidence_a.original_filename if an.evidence_a else 'N/A' }}</td>
+                        <td>{{ an.evidence_b.original_filename if an.evidence_b else 'N/A' }}</td>
+                        <td>
+                            <strong style="font-size: 14px; {% if an.similarity_score >= 71 %}color: var(--accent-rose);{% elif an.similarity_score >= 31 %}color: var(--accent-amber);{% else %}color: var(--accent-emerald);{% endif %}">
+                                {{ an.similarity_score }}%
+                            </strong>
+                        </td>
+                        <td>
+                            {% if an.assessment == 'High Similarity' %}
+                                <span class="badge badge-high">High Similarity</span>
+                            {% elif an.assessment == 'Moderate Similarity' %}
+                                <span class="badge badge-mod">Moderate Similarity</span>
+                            {% else %}
+                                <span class="badge badge-low">Low Similarity</span>
+                            {% endif %}
+                        </td>
+                        <td style="color: var(--text-muted); font-size: 12px;">{{ an.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <a href="{{ url_for('analysis.results', analysis_id=an.analysis_id) }}" class="btn btn-secondary btn-sm">View Analysis</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 25px; color: var(--text-muted);">
+                            No matching analysis history entries found.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

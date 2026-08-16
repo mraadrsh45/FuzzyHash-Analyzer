@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Case {{ case.case_id }} - FuzzyHash Analyzer{% endblock %}
+
+{% block header_title %}Case Details: {{ case.case_id }}{% endblock %}
+
+{% block content %}
+<div class="card" style="border-left: 4px solid var(--accent-cyan);">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+            <div style="font-family: var(--font-mono); color: var(--accent-cyan); font-weight: bold; font-size: 14px;">{{ case.case_id }}</div>
+            <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin: 4px 0 8px 0;">{{ case.name }}</h2>
+            <p style="color: var(--text-muted); font-size: 13px; max-width: 800px;">{{ case.description or 'No case description provided.' }}</p>
+        </div>
+        <div style="text-align: right;">
+            <span class="badge badge-mod" style="font-size: 12px; margin-bottom: 8px;">{{ case.status }}</span>
+            <div style="font-size: 11px; color: var(--text-muted);">Lead Investigator: <strong>{{ case.investigator }}</strong></div>
+            <div style="font-size: 11px; color: var(--text-muted);">Created: {{ case.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+        </div>
+    </div>
+
+    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); display: flex; gap: 10px;">
+        <a href="{{ url_for('analysis.new_analysis', case_id=case.id) }}" class="btn btn-primary btn-sm">+ Run Similarity Analysis on Case</a>
+        <a href="{{ url_for('cases.index') }}" class="btn btn-secondary btn-sm">← Back to Cases</a>
+    </div>
+</div>
+
+<!-- CASE ANALYSES -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Similarity Analyses Executed Under Case</h3>
+    </div>
+
+    <div class="table-container">
+        <table class="tech-table">
+            <thead>
+                <tr>
+                    <th>Analysis ID</th>
+                    <th>File A</th>
+                    <th>File B</th>
+                    <th>Similarity</th>
+                    <th>Assessment</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if case.analyses %}
+                    {% for an in case.analyses %}
+                    <tr>
+                        <td class="font-mono" style="color: var(--accent-cyan); font-weight: 600;">{{ an.analysis_id }}</td>
+                        <td>{{ an.evidence_a.original_filename if an.evidence_a else 'N/A' }}</td>
+                        <td>{{ an.evidence_b.original_filename if an.evidence_b else 'N/A' }}</td>
+                        <td>
+                            <strong style="font-size: 14px; {% if an.similarity_score >= 71 %}color: var(--accent-rose);{% elif an.similarity_score >= 31 %}color: var(--accent-amber);{% else %}color: var(--accent-emerald);{% endif %}">
+                                {{ an.similarity_score }}%
+                            </strong>
+                        </td>
+                        <td>
+                            {% if an.assessment == 'High Similarity' %}
+                                <span class="badge badge-high">High Similarity</span>
+                            {% elif an.assessment == 'Moderate Similarity' %}
+                                <span class="badge badge-mod">Moderate Similarity</span>
+                            {% else %}
+                                <span class="badge badge-low">Low Similarity</span>
+                            {% endif %}
+                        </td>
+                        <td style="color: var(--text-muted); font-size: 12px;">{{ an.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <a href="{{ url_for('analysis.results', analysis_id=an.analysis_id) }}" class="btn btn-secondary btn-sm">View Analysis</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                            No similarity analyses run for this case yet. Click "+ Run Similarity Analysis on Case" above.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- CASE EVIDENCE ITEMS -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Evidence Artifacts Logged</h3>
+    </div>
+
+    <div class="table-container">
+        <table class="tech-table">
+            <thead>
+                <tr>
+                    <th>Evidence ID</th>
+                    <th>Filename</th>
+                    <th>Size</th>
+                    <th>MIME Type</th>
+                    <th>SHA-256 Digest</th>
+                    <th>ssdeep Fuzzy Hash</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if case.evidences %}
+                    {% for ev in case.evidences %}
+                    <tr>
+                        <td class="font-mono" style="color: var(--accent-cyan);">{{ ev.evidence_id }}</td>
+                        <td><strong>{{ ev.original_filename }}</strong></td>
+                        <td>{{ (ev.file_size / 1024)|round(2) }} KB</td>
+                        <td>{{ ev.mime_type }}</td>
+                        <td class="font-mono" style="font-size: 11px;">{{ ev.sha256[:20] }}...</td>
+                        <td class="font-mono" style="font-size: 11px;">{{ ev.fuzzy_hash_ssdeep[:25] if ev.fuzzy_hash_ssdeep else 'N/A' }}...</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                            No evidence artifacts recorded for this case yet.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

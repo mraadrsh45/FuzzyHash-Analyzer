@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Forensic Report {{ analysis.analysis_id }} - FuzzyHash Analyzer{% endblock %}
+
+{% block header_title %}Forensic Report: {{ analysis.analysis_id }}{% endblock %}
+
+{% block content %}
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+    <div>
+        <span class="font-mono" style="color: var(--accent-cyan); font-size: 13px; font-weight: bold;">{{ analysis.analysis_id }}</span>
+        <span style="color: var(--text-muted); margin: 0 8px;">|</span>
+        <span style="font-size: 13px; color: var(--text-muted);">Case: <strong>{{ analysis.case.case_id }} ({{ analysis.case.name }})</strong></span>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+        <button onclick="window.print()" class="btn btn-secondary btn-sm">🖨️ Print Report</button>
+        <a href="{{ url_for('reports.download_report', analysis_id=analysis.analysis_id) }}" class="btn btn-primary btn-sm">📥 Download PDF</a>
+        <a href="{{ url_for('reports.index') }}" class="btn btn-secondary btn-sm">← Back to Reports</a>
+    </div>
+</div>
+
+<div class="card" style="border: 1px solid var(--accent-cyan); background: var(--bg-sidebar);">
+    <!-- REPORT HEADER -->
+    <div style="border-bottom: 2px solid var(--accent-cyan); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+            <div style="font-size: 11px; font-weight: bold; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 1px;">FUZZYHASH ANALYZER FORENSICS</div>
+            <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin-top: 4px;">Digital Forensics File Similarity Report</h2>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Automated Forensic Artifact Lineage & Variant Analysis</div>
+        </div>
+        <div style="text-align: right;">
+            <span class="badge badge-info" style="font-size: 12px;">OFFICIAL RECORD</span>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">{{ analysis.created_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}</div>
+        </div>
+    </div>
+
+    <!-- CASE & INVESTIGATION METADATA TABLE -->
+    <table class="tech-table" style="margin-bottom: 20px;">
+        <tr>
+            <th style="width: 15%;">Case ID:</th>
+            <td style="width: 35%;" class="font-mono">{{ analysis.case.case_id }}</td>
+            <th style="width: 15%;">Analysis ID:</th>
+            <td style="width: 35%;" class="font-mono">{{ analysis.analysis_id }}</td>
+        </tr>
+        <tr>
+            <th>Case Name:</th>
+            <td>{{ analysis.case.name }}</td>
+            <th>Investigator:</th>
+            <td>{{ analysis.case.investigator }}</td>
+        </tr>
+    </table>
+
+    <!-- SIMILARITY VERDICT BOX -->
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 25px;">
+        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Overall Similarity Score</div>
+        <div style="font-size: 40px; font-weight: 800; {% if analysis.similarity_score <= 30 %}color: #34d399;{% elif analysis.similarity_score <= 70 %}color: #fbbf24;{% else %}color: #fb7185;{% endif %}">
+            {{ analysis.similarity_score }}%
+        </div>
+        <div style="font-size: 16px; font-weight: 700; text-transform: uppercase; margin-top: 4px; {% if analysis.similarity_score <= 30 %}color: #34d399;{% elif analysis.similarity_score <= 70 %}color: #fbbf24;{% else %}color: #fb7185;{% endif %}">
+            {{ analysis.assessment }}
+        </div>
+    </div>
+
+    <!-- EVIDENCE FILES SUMMARY -->
+    <h3 style="font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 10px;">Evidence Artifact Details</h3>
+    <table class="tech-table" style="margin-bottom: 25px; font-size: 12px;">
+        <thead>
+            <tr>
+                <th style="width: 15%;">Attribute</th>
+                <th style="width: 42%;">File A (Reference Artifact)</th>
+                <th style="width: 43%;">File B (Target Artifact)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Original Filename</th>
+                <td><strong>{{ analysis.evidence_a.original_filename }}</strong></td>
+                <td><strong>{{ analysis.evidence_b.original_filename }}</strong></td>
+            </tr>
+            <tr>
+                <th>File Size</th>
+                <td>{{ (analysis.evidence_a.file_size / 1024)|round(2) }} KB ({{ analysis.evidence_a.file_size }} B)</td>
+                <td>{{ (analysis.evidence_b.file_size / 1024)|round(2) }} KB ({{ analysis.evidence_b.file_size }} B)</td>
+            </tr>
+            <tr>
+                <th>MIME Type</th>
+                <td>{{ analysis.evidence_a.mime_type }}</td>
+                <td>{{ analysis.evidence_b.mime_type }}</td>
+            </tr>
+            <tr>
+                <th>MD5 Digest</th>
+                <td class="font-mono">{{ analysis.evidence_a.md5 }}</td>
+                <td class="font-mono">{{ analysis.evidence_b.md5 }}</td>
+            </tr>
+            <tr>
+                <th>SHA-256 Digest</th>
+                <td class="font-mono" style="font-size: 11px;">{{ analysis.evidence_a.sha256 }}</td>
+                <td class="font-mono" style="font-size: 11px;">{{ analysis.evidence_b.sha256 }}</td>
+            </tr>
+            <tr>
+                <th>ssdeep (CTPH)</th>
+                <td class="font-mono" style="font-size: 11px; color: var(--accent-cyan);">{{ analysis.evidence_a.fuzzy_hash_ssdeep }}</td>
+                <td class="font-mono" style="font-size: 11px; color: var(--accent-cyan);">{{ analysis.evidence_b.fuzzy_hash_ssdeep }}</td>
+            </tr>
+            <tr>
+                <th>TLSH Digest</th>
+                <td class="font-mono" style="font-size: 11px; color: var(--accent-amber);">{{ analysis.evidence_a.fuzzy_hash_tlsh }}</td>
+                <td class="font-mono" style="font-size: 11px; color: var(--accent-amber);">{{ analysis.evidence_b.fuzzy_hash_tlsh }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- ALGORITHM BREAKDOWN -->
+    <h3 style="font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 10px;">Fuzzy Hashing Breakdown</h3>
+    <table class="tech-table" style="margin-bottom: 25px;">
+        <thead>
+            <tr>
+                <th>Algorithm</th>
+                <th>Metric / Raw Score</th>
+                <th>Interpretation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>ssdeep (Context-Triggered Piecewise Hashing)</strong></td>
+                <td>Score: {{ analysis.ssdeep_score }} / 100</td>
+                <td>{{ analysis.ssdeep_score }}% structural block match</td>
+            </tr>
+            <tr>
+                <td><strong>TLSH (Trend Micro Locality Sensitive Hash)</strong></td>
+                <td>Distance: {{ analysis.tlsh_score }}</td>
+                <td>{{ analysis.tlsh_similarity_pct }}% normalized similarity</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- ANALYST FINDINGS & NOTES -->
+    <h3 style="font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 10px;">Analyst Notes & Findings</h3>
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; font-size: 13px; color: var(--text-main); margin-bottom: 25px; line-height: 1.6;">
+        {{ analysis.notes or 'No additional notes provided.' }}
+    </div>
+
+    <!-- MANDATORY FORENSIC DISCLAIMER -->
+    <div style="background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+        <div style="font-size: 12px; font-weight: bold; color: var(--accent-rose); margin-bottom: 4px;">⚠️ MANDATORY FORENSIC DISCLAIMER & INVESTIGATIVE NOTICE</div>
+        <p style="font-size: 12px; color: #fb7185; line-height: 1.5; margin: 0;">
+            Similarity analysis is an investigative indicator and does not independently establish that a file is malicious. Additional static, dynamic, behavioral, or threat-intelligence analysis may be required.
+        </p>
+    </div>
+
+    <!-- REPORT FOOTER -->
+    <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-color); padding-top: 15px; font-size: 11px; color: var(--text-muted);">
+        <div>Generated by FuzzyHash Analyzer | Digital Forensics Workstation</div>
+        <div>Confidential & Privileged Investigative Material</div>
+    </div>
+</div>
+{% endblock %}

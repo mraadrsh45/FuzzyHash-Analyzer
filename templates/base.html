@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FuzzyHash Analyzer{% endblock %} | Digital Forensics Workstation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<div class="app-container">
+
+    {% if session.get('user_id') %}
+    <!-- PERSISTENT SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Logo" width="32" height="32">
+            <div class="sidebar-brand">
+                <h1>FuzzyHash</h1>
+                <span>Analyzer v2.6</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('dashboard.index') }}" class="nav-item {% if request.endpoint == 'dashboard.index' %}active{% endif %}">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v4h8V3h-8z"/></svg>
+                Dashboard
+            </a>
+            <a href="{{ url_for('cases.index') }}" class="nav-item {% if 'cases' in request.endpoint %}active{% endif %}">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                Cases
+            </a>
+            <a href="{{ url_for('analysis.new_analysis') }}" class="nav-item {% if request.endpoint == 'analysis.new_analysis' %}active{% endif %}">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>
+                New Analysis
+            </a>
+            <a href="{{ url_for('evidence.index') }}" class="nav-item {% if request.endpoint == 'evidence.index' %}active{% endif %}">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                Evidence
+            </a>
+            <a href="{{ url_for('history.index') }}" class="nav-item {% if request.endpoint == 'history.index' %}active{% endif %}">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+                History
+            </a>
+            <a href="{{ url_for('reports.index') }}" class="nav-item {% if 'reports' in request.endpoint %}active{% endif %}">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="M9 15l3 3 3-3"/></svg>
+                Reports
+            </a>
+            <a href="{{ url_for('learning.index') }}" class="nav-item {% if request.endpoint == 'learning.index' %}active{% endif %}">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                Learning
+            </a>
+            <a href="{{ url_for('settings.index') }}" class="nav-item {% if request.endpoint == 'settings.index' %}active{% endif %}">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                Settings
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <span>Local Workstation</span>
+            <a href="{{ url_for('auth.logout') }}" style="color: var(--accent-rose); text-decoration: none; font-weight: 600;">Logout</a>
+        </div>
+    </aside>
+    {% endif %}
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="main-content" {% if not session.get('user_id') %}style="margin-left: 0;"{% endif %}>
+        {% if session.get('user_id') %}
+        <header class="topbar">
+            <div class="topbar-title">
+                {% block header_title %}Digital Forensics Console{% endblock %}
+            </div>
+            <div class="topbar-actions">
+                <div class="user-badge">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--accent-emerald);"></span>
+                    <strong>{{ session.get('username', 'Analyst') }}</strong> ({{ session.get('role', 'SOC Analyst') }})
+                </div>
+                <a href="{{ url_for('analysis.new_analysis') }}" class="btn btn-primary btn-sm">+ New Analysis</a>
+            </div>
+        </header>
+        {% endif %}
+
+        <div class="content-wrapper">
+            <!-- FLASH MESSAGES -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                            <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer;">✕</button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+
+        <footer class="app-footer">
+            <div>
+                FuzzyHash Analyzer — Python Digital Forensics & File Similarity Platform | CTPH (ssdeep) & TLSH Engine
+            </div>
+            <div>
+                Files processed locally. Not submitted to external third-party services.
+            </div>
+        </footer>
+    </main>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

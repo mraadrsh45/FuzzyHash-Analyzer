@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Create Case - FuzzyHash Analyzer{% endblock %}
+
+{% block header_title %}Create New Forensic Case{% endblock %}
+
+{% block content %}
+<div style="max-width: 650px; margin: 0 auto;">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">New Forensic Case File</h3>
+            <span class="badge badge-info" style="font-family: var(--font-mono); font-size: 13px;">{{ auto_case_id }}</span>
+        </div>
+
+        <form action="{{ url_for('cases.create') }}" method="POST">
+            <div class="form-group">
+                <label class="form-label" for="name">Case Name / Investigation Title *</label>
+                <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Operation Cobalt Binary Derivative Analysis" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="investigator">Lead Investigator Name</label>
+                <input type="text" id="investigator" name="investigator" class="form-control" value="{{ session.get('username', 'Det. Analyst') }}" placeholder="Investigator Name">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="status">Initial Status</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="Open">Open</option>
+                    <option value="In Progress" selected>In Progress</option>
+                    <option value="Closed">Closed</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="description">Case Description & Forensic Scope</label>
+                <textarea id="description" name="description" class="form-control" rows="4" placeholder="Provide context regarding target artifacts, suspected malware family lineage, or incident ticket reference..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <a href="{{ url_for('cases.index') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Initialize Case File</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Evidence Management - FuzzyHash Analyzer{% endblock %}
+
+{% block header_title %}Forensic Evidence Repository{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Logged Evidence Artifacts</h3>
+        <span style="font-size: 11px; color: var(--text-muted);">Maintains strict chain of custody hashes (MD5, SHA-256, ssdeep, TLSH)</span>
+    </div>
+
+    <!-- SEARCH BAR -->
+    <form action="{{ url_for('evidence.index') }}" method="GET" style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search Evidence ID, filename, or SHA-256 hash..." style="max-width: 450px;">
+        <button type="submit" class="btn btn-secondary">Search</button>
+        {% if search_query %}
+            <a href="{{ url_for('evidence.index') }}" class="btn btn-secondary">Reset</a>
+        {% endif %}
+    </form>
+
+    <div class="table-container">
+        <table class="tech-table">
+            <thead>
+                <tr>
+                    <th>Evidence ID</th>
+                    <th>Case ID</th>
+                    <th>Filename</th>
+                    <th>File Size</th>
+                    <th>MIME Type</th>
+                    <th>SHA-256 Digest</th>
+                    <th>ssdeep Fuzzy Hash</th>
+                    <th>Logged Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if evidences %}
+                    {% for ev in evidences %}
+                    <tr>
+                        <td class="font-mono" style="color: var(--accent-cyan); font-weight: 600;">{{ ev.evidence_id }}</td>
+                        <td class="font-mono">{{ ev.case.case_id if ev.case else 'N/A' }}</td>
+                        <td><strong>{{ ev.original_filename }}</strong></td>
+                        <td>{{ (ev.file_size / 1024)|round(2) }} KB</td>
+                        <td><span class="badge badge-info">{{ ev.mime_type }}</span></td>
+                        <td class="font-mono" style="font-size: 11px;" title="{{ ev.sha256 }}">{{ ev.sha256[:20] }}...</td>
+                        <td class="font-mono" style="font-size: 11px; color: var(--accent-cyan);" title="{{ ev.fuzzy_hash_ssdeep }}">{{ ev.fuzzy_hash_ssdeep[:22] if ev.fuzzy_hash_ssdeep else 'N/A' }}...</td>
+                        <td style="color: var(--text-muted); font-size: 12px;">{{ ev.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 25px; color: var(--text-muted);">
+                            No matching evidence records logged in the system.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

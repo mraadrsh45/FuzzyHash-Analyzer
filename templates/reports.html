@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Forensic Reports - FuzzyHash Analyzer{% endblock %}
+
+{% block header_title %}Forensic Reports Repository{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Generated Forensic Analysis Reports</h3>
+        <span class="badge badge-info">{{ analyses|length }} Total Reports</span>
+    </div>
+
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+        Formal forensic similarity assessment documents generated for case analyses. All PDF reports conform to forensic standards and include cryptographic integrity hashes, algorithm metrics, analyst notes, and investigative guidelines.
+    </p>
+
+    {% if analyses %}
+    <div class="table-container">
+        <table class="tech-table">
+            <thead>
+                <tr>
+                    <th>Report / Analysis ID</th>
+                    <th>Forensic Case</th>
+                    <th>Evidence Comparison</th>
+                    <th>Similarity</th>
+                    <th>Assessment</th>
+                    <th>Timestamp</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in analyses %}
+                <tr>
+                    <td class="font-mono" style="font-weight: bold; color: var(--accent-cyan);">
+                        {{ a.analysis_id }}
+                    </td>
+                    <td>
+                        <strong>{{ a.case.case_id }}</strong><br>
+                        <span style="font-size: 11px; color: var(--text-muted);">{{ a.case.name }}</span>
+                    </td>
+                    <td>
+                        <span style="font-size: 12px;"><strong>A:</strong> {{ a.evidence_a.original_filename }}</span><br>
+                        <span style="font-size: 12px;"><strong>B:</strong> {{ a.evidence_b.original_filename }}</span>
+                    </td>
+                    <td>
+                        <strong style="font-size: 14px;">{{ a.similarity_score }}%</strong>
+                    </td>
+                    <td>
+                        {% if a.similarity_score <= 30 %}
+                            <span class="badge badge-low">{{ a.assessment }}</span>
+                        {% elif a.similarity_score <= 70 %}
+                            <span class="badge badge-mod">{{ a.assessment }}</span>
+                        {% else %}
+                            <span class="badge badge-high">{{ a.assessment }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size: 12px; color: var(--text-muted);">
+                        {{ a.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 6px;">
+                            <a href="{{ url_for('reports.view_report', analysis_id=a.analysis_id) }}" class="btn btn-secondary btn-sm" title="View Web Report">
+                                👁️ View
+                            </a>
+                            <a href="{{ url_for('reports.download_report', analysis_id=a.analysis_id) }}" class="btn btn-primary btn-sm" title="Download PDF Report">
+                                📥 PDF
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+        <div style="font-size: 32px; margin-bottom: 10px;">📄</div>
+        <p>No forensic reports generated yet.</p>
+        <a href="{{ url_for('analysis.new_analysis') }}" class="btn btn-primary btn-sm" style="margin-top: 10px;">Run First Analysis</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

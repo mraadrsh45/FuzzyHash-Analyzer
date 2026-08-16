@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}SOC Login - FuzzyHash Analyzer{% endblock %}
+
+{% block content %}
+<div style="max-width: 420px; margin: 60px auto 0 auto;">
+    <div class="card" style="padding: 30px; text-align: center; border-top: 4px solid var(--accent-cyan);">
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Logo" width="48" height="48" style="margin-bottom: 12px;">
+        <h2 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">FuzzyHash Analyzer</h2>
+        <p style="font-size: 12px; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 24px;">Digital Forensics Workstation</p>
+
+        <form action="{{ url_for('auth.login') }}" method="POST" style="text-align: left;">
+            <div class="form-group">
+                <label class="form-label" for="username">Investigator Username</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="Enter username (e.g. admin)" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 12px;">
+                Authenticate & Access Console
+            </button>
+        </form>
+
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); font-size: 11px; color: var(--text-muted);">
+            <div>Default Academic/Demo Credentials:</div>
+            <code style="color: var(--accent-emerald); font-weight: bold;">admin</code> / <code style="color: var(--accent-emerald); font-weight: bold;">admin123</code>
+        </div>
+    </div>
+</div>
+{% endblock %}

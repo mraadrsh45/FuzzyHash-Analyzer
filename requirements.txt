@@ -1,0 +1,10 @@
+Flask>=3.0.0
+Flask-SQLAlchemy>=3.1.0
+Werkzeug>=3.0.0
+reportlab>=4.0.0
+pefile>=2024.8.26
+python-magic-bin>=0.4.14; sys_platform == 'win32'
+python-magic>=0.4.27; sys_platform != 'win32'
+ppdeep>=2.0.0
+tlsh>=0.2.0
+pytest>=8.0.0
