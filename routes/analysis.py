@@ -15,6 +15,7 @@ from services.report_service import ReportService
 
 analysis_bp = Blueprint('analysis', __name__)
 
+@analysis_bp.route('/analysis')
 @analysis_bp.route('/analysis/new')
 @login_required
 def new_analysis():
