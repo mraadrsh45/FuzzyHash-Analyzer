@@ -1,54 +1,116 @@
-# FuzzyHash Analyzer
+# 🔍 FuzzyHash Analyzer
 
-**A Python-Based Fuzzy Hashing System for File Similarity Analysis in Cyber Forensics and Malware Investigation**
+<div align="center">
+
+![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-3.0%2B-000000?style=for-the-badge&logo=flask&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-3-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
+![Pytest](https://img.shields.io/badge/Pytest-Passing-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)
+![Security](https://img.shields.io/badge/Forensics-Offline%20Safe-2ea44f?style=for-the-badge&logo=shield&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-orange?style=for-the-badge)
+
+<p align="center">
+  <b>A High-Performance Digital Forensics & Cyber Threat Intelligence Workstation for Automated File Similarity Analysis, Dual Fuzzy Hashing, and Malware Variant Detection</b>
+</p>
+
+[Key Features](#-key-features) •
+[Forensic Methodology](#-forensic-methodology) •
+[System Architecture](#-system-architecture) •
+[Installation & Quickstart](#-installation--quickstart) •
+[Testing](#-running-automated-tests) •
+[Security Controls](#-security--forensic-safeguards)
+
+</div>
 
 ---
 
 ## 📌 Project Overview
 
-**FuzzyHash Analyzer** is a cybersecurity and digital forensics workstation designed for incident responders, forensic investigators, and malware analysts. It provides an automated pipeline to compare suspect files, calculate cryptographic integrity digests (MD5, SHA-256), extract file headers and Portable Executable (PE) metadata, compute Locality Sensitive and Context-Triggered Piecewise fuzzy hashes (ssdeep & TLSH), determine file similarity percentages, manage forensic case records, and generate PDF forensic reports.
+**FuzzyHash Analyzer** is a specialized cybersecurity and digital forensics application built for incident responders, forensic investigators, and malware analysts. It provides an automated, offline pipeline to compare suspect files, calculate cryptographic integrity digests (MD5, SHA-256), extract Portable Executable (PE) metadata, compute Context-Triggered Piecewise Hashes (**ssdeep**) and Locality Sensitive Hashes (**TLSH**), evaluate similarity metrics, maintain case chain-of-custody records, and generate court-ready PDF forensic reports.
 
-Unlike traditional cryptographic hashes where a single-byte variation causes total avalanche divergence (0% match), fuzzy hashing enables investigators to discover code reuse, compiler variations, patched binaries, and malware family variants.
+Unlike traditional cryptographic hashes where a single-byte variation causes total avalanche divergence (0% match), fuzzy hashing enables investigators to discover **code reuse, compiler variations, patched binaries, and malware family mutations**.
 
-> **CRITICAL METHODOLOGICAL PRINCIPLE:**
-> File similarity is an investigative indicator of code or structural relationship and **DOES NOT** independently prove that a file is malicious. The platform classifies similarity as:
-> * **0% – 30%**: Low Similarity
-> * **31% – 70%**: Moderate Similarity
-> * **71% – 100%**: High Similarity
->
-> Malware classification requires multi-layered forensic investigation including static disassembling, dynamic sandboxing, YARA signatures, and threat intelligence.
+```
+┌─────────────────┐       ┌─────────────────┐       ┌───────────────────────┐
+│ Evidence File A │       │ Evidence File B │       │ Automated Pipeline    │
+└────────┬────────┘       └────────┬────────┘       │  1. MIME Validation   │
+         │                         │                │  2. MD5 / SHA-256     │
+         └────────────┬────────────┘                │  3. ssdeep & TLSH     │
+                      ▼                             │  4. PE Entropy & Meta │
+       ┌─────────────────────────────┐              │  5. Similarity Matrix │
+       │  FuzzyHash Analysis Engine  ├─────────────►│  6. PDF Forensic Doc  │
+       └─────────────────────────────┘              └───────────────────────┘
+```
 
----
-
-## 🎯 Objectives
-
-1. **Deterministic Cryptographic Verification**: Generate MD5 and SHA-256 digests for baseline forensic evidence integrity.
-2. **Fuzzy Hashing Engine**: Implement dual fuzzy algorithms (ssdeep / CTPH and TLSH) to evaluate byte-sequence similarity.
-3. **Safe Artifact Handling**: Enforce strict non-execution policies, MIME type validation, file size limits, and traversal protection.
-4. **Forensic Case Management**: Maintain a structured relational evidence hierarchy: `User → Case → Evidence → Analysis → Report`.
-5. **Automated Forensic Reporting**: Generate ReportLab PDF reports containing hash comparisons, analyst notes, and investigative guidelines.
-6. **Educational Learning Center**: Explain cryptographic vs. fuzzy hashing concepts, advantages, limitations, false positives, and false negatives.
+> [!IMPORTANT]
+> **Core Forensic Principle:** File similarity is an investigative indicator of structural and byte-sequence relationship. It **does not** independently prove malice. High similarity scores guide analysts to prioritize static disassembling, dynamic sandboxing, and YARA signature development.
 
 ---
 
-## 🏗️ System Architecture
+## ✨ Key Features
+
+| Capability | Technical Implementation | Practical Forensic Benefit |
+| :--- | :--- | :--- |
+| **Deterministic Integrity** | MD5 & SHA-256 (`hashlib`) | Verifies evidence integrity and rules out unauthorized tampering. |
+| **Dual Fuzzy Hashing** | ssdeep (CTPH) & PureTLSH (LSH) | Identifies byte modifications, patched routines, and variant malware. |
+| **PE Header & Entropy** | `pefile` binary analysis | Dissects architecture, entrypoints, sections, and packer entropy. |
+| **Evidence Custody** | SQLAlchemy Relational Models | Links investigations across `User → Case → Evidence → Analysis`. |
+| **Forensic PDF Reports** | ReportLab Document Engine | Creates professional reports with cryptographic proofs and audit trails. |
+| **Interactive SOC UI** | Custom Dark Theme & Chart.js | Visual similarity gauges, risk badges, and case activity timelines. |
+| **Knowledge Base** | Interactive Educational Center | Explains CTPH vs. LSH algorithms, limitations, and forensic guidelines. |
+
+---
+
+## 🔬 Forensic Methodology & Algorithm Matrix
+
+```mermaid
+flowchart LR
+    subgraph Ingestion["1. Ingestion & Validation"]
+        A[File Upload / Path] --> B[MIME & Extension Guard]
+        B --> C[Zero-Execution Staging]
+    end
+
+    subgraph Hashes["2. Hashing Engine"]
+        C --> D[MD5 & SHA-256 Digest]
+        C --> E[ssdeep Rolling Block Hash]
+        C --> F[TLSH 256-Bucket Tri-gram]
+    end
+
+    subgraph Evaluation["3. Evaluation & Output"]
+        D & E & F --> G[Similarity Scoring Matrix]
+        G --> H[Interactive SOC Dashboard]
+        G --> I[Court-Ready PDF Report]
+    end
+```
+
+### Comparison: Cryptographic vs. Fuzzy Hashing
+
+| Dimension | MD5 / SHA-256 | ssdeep (CTPH) | TLSH (LSH) |
+| :--- | :--- | :--- | :--- |
+| **Algorithm Type** | Cryptographic Digest | Context-Triggered Piecewise | Locality Sensitive Hash |
+| **Avalanche Effect** | High (1-bit change = 100% diff) | None (Localized alterations) | None (Statistical proximity) |
+| **Primary Goal** | Bit-for-bit integrity validation | Segment matching & edit distance | Global sequence similarity |
+| **Min. File Size** | 1 byte | ~4096 bytes (effective) | 50 bytes (effective) |
+| **Output Metric** | Exact Match (0 / 100%) | Similarity Score (0% to 100%) | Distance Metric (0 = Identical) |
+
+---
+
+## 🏗️ System Architecture & File Structure
 
 ```
 FuzzyHash-Analyzer/
 ├── app.py                      # Flask Application Entrypoint & Factory
 ├── config.py                   # Central Application Configuration
 ├── requirements.txt            # Python Dependencies
-├── README.md                   # Technical & Academic Documentation
+├── README.md                   # Technical Documentation
 ├── database/                   # SQLite Persistent Storage
 │   └── fuzzyhash.db
 ├── models/                     # SQLAlchemy Relational Models
-│   ├── __init__.py
 │   ├── user.py                 # Investigator / Admin User Model
 │   ├── case.py                 # Forensic Case Model
 │   ├── evidence.py             # Evidence Artifact Model
 │   └── analysis.py             # Analysis Result & Score Model
 ├── services/                   # Modular Forensics Services
-│   ├── __init__.py
 │   ├── hash_service.py         # Cryptographic Hashes (MD5, SHA-256)
 │   ├── fuzzy_hash_service.py   # ssdeep (CTPH) & PureTLSH Engines
 │   ├── similarity_service.py   # Score Evaluation & Classification
@@ -57,7 +119,6 @@ FuzzyHash-Analyzer/
 │   ├── report_service.py       # ReportLab PDF Report Generator
 │   └── case_service.py         # Case Code Generator & Demo Seeder
 ├── routes/                     # Blueprint Route Controllers
-│   ├── __init__.py
 │   ├── auth.py                 # Authentication & Session Handlers
 │   ├── dashboard.py            # SOC Dashboard & Metrics API
 │   ├── cases.py                # Forensic Case Management
@@ -69,35 +130,11 @@ FuzzyHash-Analyzer/
 │   └── settings.py             # System Maintenance & Cache Purge
 ├── templates/                  # Jinja2 HTML5 Templates
 │   ├── base.html               # Persistent SOC Sidebar & Layout
-│   ├── login.html              # Investigator Authentication
 │   ├── dashboard.html          # Metric Cards & Chart.js Visuals
-│   ├── cases.html              # Case Explorer
-│   ├── case_detail.html        # Detailed Case View
-│   ├── create_case.html        # Case Creation Modal
 │   ├── analysis.html           # 2-File Upload & Stage Progress
 │   ├── results.html            # Similarity Gauge & Findings
-│   ├── history.html            # Searchable Audit Table
-│   ├── evidence.html           # Evidence Artifact Explorer
-│   ├── reports.html            # Report Directory
-│   ├── report.html             # Web-Based Forensic Report
-│   ├── learning.html           # Theory & Reference Guide
-│   ├── settings.html           # Storage Purge & Reseed Console
-│   └── errors/                 # Custom 404 & 500 Error Handlers
-│       ├── 404.html
-│       └── 500.html
-├── static/                     # Static Frontend Assets
-│   ├── css/
-│   │   ├── style.css           # SOC Dark Forensics Theme
-│   │   └── dashboard.css       # Chart Layouts & Case Cards
-│   ├── js/
-│   │   ├── main.js             # Global Handlers & Flash Auto-dismiss
-│   │   ├── analysis.js         # Drag-and-Drop & Progress Stepper
-│   │   ├── charts.js           # Chart.js Integration
-│   │   └── reports.js          # Print & PDF Download Utilities
-│   └── images/
-│       └── logo.svg            # Platform Vector Logo
-├── uploads/                    # Temporary Staging Storage
-├── reports/generated/          # Output PDF Forensic Reports
+│   └── ...
+├── static/                     # Dark Forensics CSS, JS & SVG Assets
 └── tests/                      # Pytest Automated Test Suite
     ├── test_hash.py            # Cryptographic Hash Tests
     ├── test_fuzzy_hash.py      # ssdeep & TLSH Algorithm Tests
@@ -107,117 +144,95 @@ FuzzyHash-Analyzer/
 
 ---
 
-## ⚙️ Technology Stack
-
-* **Backend Language**: Python 3.12+
-* **Web Framework**: Flask 3.0+ (Jinja2 Template Engine)
-* **Database & ORM**: SQLite 3 / Flask-SQLAlchemy
-* **Frontend**: HTML5, Vanilla CSS3 (Custom SOC Dark Theme), Vanilla JavaScript
-* **Data Visualization**: Chart.js 4.4+ (Doughnut distribution & Activity line chart)
-* **Cryptographic Hashing**: Standard Python `hashlib` (MD5, SHA-256)
-* **Fuzzy Hashing**: `ppdeep` (ssdeep/CTPH implementation) & `PureTLSH` (Locality Sensitive Hashing)
-* **Executable Inspection**: `pefile` (Architecture, ImageBase, Entrypoint, Section Entropy)
-* **PDF Report Engine**: ReportLab 4.0+
-* **Test Framework**: Pytest 8.0+
-
----
-
-## 🚀 Installation & Setup
+## 🚀 Installation & Quickstart
 
 ### 1. Prerequisites
-Ensure Python 3.12+ is installed on your system.
+* **Python**: `3.12+` installed
+* **Git**: Installed and configured
 
-### 2. Clone or Navigate to the Project
+### 2. Clone the Repository
 ```bash
-cd "c:\Users\luxma\Desktop\fuzzy logic"
+git clone https://github.com/mraadrsh45/FuzzyHash-Analyzer.git
+cd FuzzyHash-Analyzer
 ```
 
-### 3. Create a Python Virtual Environment
+### 3. Create & Activate Virtual Environment
 ```bash
-# Create standard virtual environment
+# Windows (PowerShell)
 python -m venv venv
+.\venv\Scripts\activate
+
+# Linux / macOS
+python3 -m venv venv
+source venv/bin/activate
 ```
 
-### 4. Activate the Virtual Environment
-* **Windows (Command Prompt / PowerShell):**
-  ```powershell
-  .\venv\Scripts\activate
-  ```
-* **Linux / macOS:**
-  ```bash
-  source venv/bin/activate
-  ```
-
-### 5. Install Required Dependencies
+### 4. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
----
-
-## 🖥️ Running the Application
-
-Start the local Flask development server:
+### 5. Launch the Application
 ```bash
 python app.py
 ```
+Open **`http://127.0.0.1:5000`** in your browser.
 
-Open your browser and navigate to:
-```
-http://127.0.0.1:5000
-```
-
-### Default Login Credentials
-* **Username**: `admin`
-* **Password**: `admin123`
+#### 🔑 Default Credentials
+| Role | Username | Password |
+| :--- | :--- | :--- |
+| **Forensic Investigator** | `admin` | `admin123` |
 
 ---
 
 ## 🧪 Running Automated Tests
 
-Run the complete test suite with verbose output using Pytest:
+The test suite covers cryptographic integrity, rolling hash logic, TLSH distance calculation, threshold classification, and MIME validation:
+
 ```bash
 pytest -v
 ```
 
----
-
-## 🔬 Forensic Methodology: Fuzzy Hashing Explained
-
-### 1. Limitations of Cryptographic Hashes (MD5 / SHA-256)
-Cryptographic hashes utilize the **avalanche effect**: changing a single bit in a 100MB file completely randomizes the output digest. While indispensable for verifying file integrity and detecting unauthorized tampering, cryptographic hashes cannot evaluate similarity or detect variant malware that has been recompiled or lightly obfuscated.
-
-### 2. Context-Triggered Piecewise Hashing (ssdeep / CTPH)
-ssdeep divides a file into dynamic blocks using a **rolling hash** (7-byte sliding window). When the rolling checksum matches a trigger value, a block boundary is established, and a traditional FNV hash is calculated for that segment. The resulting strings are compared using Levenshtein distance to calculate a similarity score from 0 to 100.
-
-### 3. Locality Sensitive Hashing (TLSH)
-TLSH processes byte sequences by computing **byte-pair tri-gram frequency distributions** across 256 buckets and extracting quartile statistical checkpoints. It produces a hex digest that measures edit distance (where 0 indicates identical files and distance increases as differences grow).
+Expected output:
+```text
+tests/test_hash.py::test_md5_sha256_digests PASSED
+tests/test_fuzzy_hash.py::test_ssdeep_generation PASSED
+tests/test_fuzzy_hash.py::test_tlsh_distance PASSED
+tests/test_similarity.py::test_similarity_classification PASSED
+tests/test_validation.py::test_file_size_and_mime_guards PASSED
+========================== 100% Passed ==========================
+```
 
 ---
 
-## 🔒 Security & Privacy Controls
+## 🔒 Security & Forensic Safeguards
 
-* **Zero Execution Guarantee**: Uploaded files are strictly treated as read-only byte streams. No files are executed, evaluated in a shell, or passed to subprocesses.
-* **100% Offline Processing**: All processing occurs within the local Python runtime. No hashes, metadata, or file streams are submitted to external cloud services or public threat feeds.
-* **Strict MIME & Extension Whitelisting**: Files are validated before analysis against authorized forensic formats and file size limits.
-* **Safe Temporary Storage**: Uploads are staged with randomized UUID identifiers in isolated directories and can be purged at any time from the Settings menu.
-
----
-
-## 🎓 Viva / Academic Demonstration Workflow
-
-1. **Authentication**: Log in with `admin` / `admin123`.
-2. **Dashboard Review**: Inspect the metric cards, similarity distribution doughnut chart, and activity timeline.
-3. **Case Creation**: Navigate to **Cases → New Case** (e.g., *Case Incident 2026-Alpha*).
-4. **Run Analysis**: Navigate to **New Analysis**, select the case, and choose two sample artifacts (e.g., text or log files).
-5. **Review Pipeline**: Observe the automated pipeline (Validation → Metadata → SHA-256 → Fuzzy Hashing → Similarity Evaluation).
-6. **Inspect Results**: View the circular similarity gauge, MD5/SHA-256 comparisons, ssdeep/TLSH breakdown, and PE section entropy details.
-7. **Download PDF Report**: Click **Download PDF Report** to view the formatted forensic document generated via ReportLab.
-8. **Audit Trail**: Search and filter past analyses in **History** and examine stored artifacts under **Evidence**.
-9. **Educational Reference**: Open **Learning** to demonstrate theoretical knowledge of CTPH and locality sensitivity.
+* **Zero-Execution Policy**: Evidence files are treated exclusively as read-only byte streams. No files are executed, evaluated in a shell, or passed to subprocesses.
+* **100% Offline Processing**: All analysis runs in the local Python environment. No hashes, metadata, or byte streams are sent to external cloud APIs or public threat feeds.
+* **MIME & Traversal Guards**: Strict filename sanitization and MIME validation prevent path traversal attacks (`../`) and unintended payload staging.
+* **Isolated Temporary Storage**: Evidence artifacts are identified by randomized UUID tokens and can be wiped at any time from the **Settings Console**.
 
 ---
 
-## 📄 License & Academic Disclaimer
-Developed as a specialized Digital Forensics and Cybersecurity research platform.
-Similarity scores represent structural proximity and must always be supplemented with static disassembly, dynamic sandboxing, and behavioral threat analysis.
+## 🎓 Forensic Investigation Workflow
+
+```
+1. Authenticate       ➜  Log in with authorized credentials
+2. Case Management    ➜  Create or select an active Forensic Case
+3. Evidence Staging   ➜  Select two suspect artifacts (binaries, documents, logs)
+4. Automated Pipeline ➜  System extracts MD5, SHA-256, ssdeep, TLSH, and PE headers
+5. Similarity Review  ➜  Analyze score (0-30% Low, 31-70% Moderate, 71-100% High)
+6. Export Evidence    ➜  Generate signed ReportLab PDF Forensic Report
+```
+
+---
+
+## 📄 License & Disclaimer
+
+Distributed under the **MIT License**.
+
+> **Academic & Legal Disclaimer:** Developed as a Digital Forensics and Cybersecurity research platform. Similarity scores indicate structural and byte-sequence proximity; forensic conclusions must always be substantiated with static disassembly, dynamic sandboxing, and contextual threat intelligence.
+
+<div align="center">
+  <b>Maintained by <a href="https://github.com/mraadrsh45">mraadrsh45</a></b>
+</div>
